@@ -19,7 +19,7 @@ model Chapter {
     updatedAt DateTime @updatedAt
 
     uuid               String   @unique
-    title              String
+    title              String?
     volume             String?
     chapter            String?
     publishedAt        DateTime

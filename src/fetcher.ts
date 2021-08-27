@@ -6,12 +6,17 @@ import 'dotenv/config'
 import { prisma } from './components/prisma'
 import { Sentry } from './components/sentry'
 import axios from 'axios'
-import util from 'util'
 
 setInterval(() => {
-	fetchNewChapters().catch(e => Sentry.captureException(e))
+	fetchNewChapters().catch(e => {
+		console.error(e)
+		Sentry.captureException(e)
+	})
 }, 60 * 1000)
-fetchNewChapters().catch(e => Sentry.captureException(e))
+fetchNewChapters().catch(e => {
+	console.error(e)
+	Sentry.captureException(e)
+})
 
 async function fetchNewChapters() {
 	const lastPublishedDate = await getLastPublishedDate()
@@ -156,7 +161,6 @@ async function fetchChaptersSince(since?: string) {
 			}
 		})
 		.then(d => {
-			console.log(util.inspect(d.data.results, false, 100, true))
 			return d.data.results.map(r => {
 				const attrs = r.data.attributes
 				return {
