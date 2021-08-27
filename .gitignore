@@ -1,0 +1,8 @@
+node_modules
+*.key
+*.pem
+dist
+.vscode
+.env
+.yarn-error*
+docker-compose.yml

@@ -1,0 +1,65 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DB_URI")
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    binaryTargets   = ["native"]
+    previewFeatures = ["nApi"]
+}
+
+model Chapter {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    uuid               String   @unique
+    title              String
+    volume             String?
+    chapter            String?
+    publishedAt        DateTime
+    translatedLanguage String
+    groupUuids         String[]
+
+    uploader     User   @relation(fields: [uploaderUuid], references: [uuid])
+    uploaderUuid String
+    manga        Manga  @relation(fields: [mangaUuid], references: [uuid])
+    mangaUuid    String
+}
+
+model ScanlationGroup {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    uuid String @unique
+    name String
+}
+
+model Manga {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    uuid             String @unique
+    title            Json
+    originalLanguage String
+
+    chapters Chapter[]
+}
+
+model User {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    uuid     String @unique
+    username String
+
+    chapters Chapter[]
+}
