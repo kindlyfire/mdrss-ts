@@ -6,7 +6,7 @@ import { router } from '../components/router'
 import * as Boom from '@hapi/boom'
 import { prisma } from '../components/prisma'
 import { Feed } from 'feed'
-import { Chapter, Manga, ScanlationGroup } from '@prisma/client'
+import { Chapter, Manga, ScanlationGroup, User } from '@prisma/client'
 
 export function init() {
 	router.get('/feed', async ctx => {
@@ -32,9 +32,36 @@ export function init() {
 		const queries = rawQueries.map(parseQuery)
 		const results = await executeQueries(queries)
 
+		let title = ''
+		if (queries.length === 1) {
+			if (queries[0].manga) {
+				const titles = results[0]?.manga.title as any
+				title =
+					queries[0].languages.map(l => titles[l]).filter(v => !!v)[0] ||
+					titles['en'] ||
+					Object.values(titles)[0] ||
+					''
+			} else if (queries[0].groups.length > 0) {
+				title =
+					'Groups: ' +
+					queries[0].groups.map(group =>
+						results
+							.map(res => res.groups.find(g => g.uuid === group)?.name)
+							.find(v => !!v)
+					)
+			} else if (queries[0].user) {
+				title = 'User: ' + results[0].uploader.username
+			} else if (queries[0].languages.length > 0) {
+				title = 'Languages: ' + queries[0].languages.join(', ')
+			} else if (queries[0].originalLanguages.length > 0) {
+				title = 'Original languages: ' + queries[0].originalLanguages.join(', ')
+			}
+		}
+
 		const feed = buildFeed(
 			results,
-			'https://mdrss.tijlvdb.me' + ctx.request.url
+			'https://mdrss.tijlvdb.me' + ctx.request.url,
+			title
 		)
 
 		const format = ['rss2', 'json1', 'atom1'].includes(ctx.query.format as any)
@@ -95,7 +122,8 @@ async function executeQueries(queries: ReturnType<typeof parseQuery>[]) {
 			})
 		},
 		include: {
-			manga: true
+			manga: true,
+			uploader: true
 		},
 		orderBy: {
 			publishedAt: 'desc'
@@ -131,11 +159,16 @@ async function executeQueries(queries: ReturnType<typeof parseQuery>[]) {
 }
 
 function buildFeed(
-	chapters: (Chapter & { manga: Manga; groups: ScanlationGroup[] })[],
-	url: string
+	chapters: (Chapter & {
+		manga: Manga
+		groups: ScanlationGroup[]
+		uploader: User
+	})[],
+	url: string,
+	title: string
 ) {
 	const feed = new Feed({
-		title: 'MDRSS',
+		title: 'MDRSS' + (title ? ` - ${title}` : ''),
 		copyright: '',
 		description: '',
 		link: url,
@@ -170,9 +203,22 @@ function buildFeed(
 			}),
 			description: `
                 <b>${mangaTitle}</b><br />
-                ${chapterTitle}<br />
-                <a href="https://mangadex.org/chapter/${chapter.uuid}" target="_blank">Read chapter</a><br />
-                <a href="https://mangadex.org/title/${chapter.manga.uuid}" target="_blank">View manga</a>
+                ${chapterTitle}<br /><br />
+				<b>Groups</b>: ${chapter.groups
+					.map(
+						group =>
+							`<a href="https://mangadex.org/group/${group.uuid}" target="_blank">${group.name}</a>`
+					)
+					.join(', ')}<br />
+				<b>Uploader</b>: <a href="https://mangadex.org/user/${chapter.uploader.uuid}">${
+				chapter.uploader.username
+			}</a><br /><br />
+                <a href="https://mangadex.org/chapter/${
+									chapter.uuid
+								}" target="_blank"><b>Read chapter</b></a><br />
+                <a href="https://mangadex.org/title/${
+									chapter.manga.uuid
+								}" target="_blank">View manga</a>
             `
 		})
 	}
