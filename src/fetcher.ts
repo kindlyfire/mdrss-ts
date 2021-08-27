@@ -149,9 +149,9 @@ async function fetchChaptersSince(since?: string) {
 	return axios
 		.get(`https://api.mangadex.org/chapter`, {
 			params: {
-				limit: 5,
+				limit: 20,
 				publishAtSince: since,
-				'order[publishAt]': 'asc',
+				'order[publishAt]': since ? 'asc' : 'desc', // If we don't have any chapters yet, we want the last chapters, not the first
 				includes: ['manga', 'user', 'scanlation_group']
 			}
 		})
