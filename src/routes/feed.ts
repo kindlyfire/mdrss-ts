@@ -151,9 +151,9 @@ async function executeQueries(queries: ReturnType<typeof parseQuery>[]) {
 	return results.map(result => {
 		return {
 			...result,
-			groups: groups.filter(g =>
-				result.groupUuids.includes(g?.uuid!)
-			) as NonNullable<typeof groups[0]>[]
+			groups: result.groupUuids
+				.map(uuid => groups.find(g => g?.uuid === uuid))
+				.filter(v => !!v) as NonNullable<typeof groups[0]>[]
 		}
 	})
 }
