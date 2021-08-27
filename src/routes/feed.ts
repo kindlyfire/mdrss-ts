@@ -44,11 +44,13 @@ export function init() {
 			} else if (queries[0].groups.length > 0) {
 				title =
 					'Groups: ' +
-					queries[0].groups.map(group =>
-						results
-							.map(res => res.groups.find(g => g.uuid === group)?.name)
-							.find(v => !!v)
-					)
+					queries[0].groups
+						.map(group =>
+							results
+								.map(res => res.groups.find(g => g.uuid === group)?.name)
+								.find(v => !!v)
+						)
+						.filter(v => !!v)
 			} else if (queries[0].user) {
 				title = 'User: ' + results[0].uploader.username
 			} else if (queries[0].languages.length > 0) {
