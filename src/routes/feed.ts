@@ -33,7 +33,7 @@ export function init() {
 		const results = await executeQueries(queries)
 
 		let title = ''
-		if (queries.length === 1) {
+		if (queries.length === 1 && results.length > 0) {
 			if (queries[0].manga) {
 				const titles = results[0]?.manga.title as any
 				title =
