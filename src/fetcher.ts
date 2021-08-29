@@ -163,6 +163,7 @@ async function fetchChaptersSince(since?: string) {
 		.then(d => {
 			return d.data.results.map(r => {
 				const attrs = r.data.attributes
+				const rels = r.data.relationships
 				return {
 					id: r.data.id,
 					title: attrs.title,
@@ -171,13 +172,13 @@ async function fetchChaptersSince(since?: string) {
 					publishedAt: attrs.publishAt,
 					translatedLanguage: attrs.translatedLanguage,
 					uploader: compactMdRelationshipObject(
-						r.relationships.find(rel => rel.type === 'user')
+						rels.find(rel => rel.type === 'user')
 					),
-					groups: r.relationships
+					groups: rels
 						.filter(rel => rel.type === 'scanlation_group')
 						.map(compactMdRelationshipObject),
 					manga: compactMdRelationshipObject(
-						r.relationships.find(rel => rel.type === 'manga')
+						rels.find(rel => rel.type === 'manga')
 					)
 				}
 			})
