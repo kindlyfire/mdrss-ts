@@ -34,7 +34,7 @@ export function init() {
 
 		let title = ''
 		if (queries.length === 1 && results.length > 0) {
-			if (queries[0].manga) {
+			if (queries[0].manga.length === 1) {
 				const titles = results[0]?.manga.title as any
 				title =
 					queries[0].languages.map(l => titles[l]).filter(v => !!v)[0] ||
@@ -51,7 +51,8 @@ export function init() {
 								.find(v => !!v)
 						)
 						.filter(v => !!v)
-			} else if (queries[0].user) {
+						.join(', ')
+			} else if (queries[0].user.length === 1) {
 				title = 'User: ' + results[0].uploader.username
 			} else if (queries[0].languages.length > 0) {
 				title = 'Languages: ' + queries[0].languages.join(', ')
@@ -85,8 +86,8 @@ export function init() {
 function parseQuery(parts: string[]) {
 	const ids = parts.map(p => p.toLowerCase().split(':'))
 	return {
-		manga: ids.find(uuid => uuid[0] === 'manga')?.[1],
-		user: ids.find(uuid => uuid[0] === 'user')?.[1],
+		manga: ids.filter(uuid => uuid[0] === 'manga').map(u => u[1]),
+		user: ids.filter(uuid => uuid[0] === 'user').map(u => u[1]),
 		groups: ids.filter(uuid => uuid[0] === 'group').map(u => u[1]),
 		languages: ids.filter(uuid => uuid[0] === 'tl').map(u => u[1]),
 		originalLanguages: ids.filter(uuid => uuid[0] === 'ol').map(u => u[1])
@@ -98,8 +99,18 @@ async function executeQueries(queries: ReturnType<typeof parseQuery>[]) {
 		where: {
 			OR: queries.map(query => {
 				return {
-					mangaUuid: query.manga,
-					uploaderUuid: query.user,
+					mangaUuid:
+						query.manga.length > 0
+							? {
+									in: query.manga
+							  }
+							: undefined,
+					uploaderUuid:
+						query.user.length > 0
+							? {
+									in: query.user
+							  }
+							: undefined,
 					groupUuids:
 						query.groups.length > 0
 							? {

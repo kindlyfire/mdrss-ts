@@ -15,13 +15,15 @@ A query is made out of multiple key-value matchers in `key:value` format,
 separated by commas. The different available keys are:
 
 - `manga`: Filter my manga UUID
-- `group`: Filter by group UUID (repeatable)
+- `group`: Filter by group UUID
 - `user`: Filter by uploader UUID
-- `tl`: Translation language (repeatable)
-- `ol`: Original language (repeatable)
+- `tl`: Translation language
+- `ol`: Original language
 
-Repeatable matchers are `OR`s internally, so at least one of each specified kind
-will match. At least one matcher must be present per query.
+All matchers can be repeated and each kind uses `OR`s internally, so at least
+one of each specified kind will match. For example, if you specify two manga and
+two groups, at least one manga and one group will match each entry in the feed.
+At least one matcher must be present per query.
 
 Examples:
 
