@@ -9,6 +9,9 @@ Public feed generator for [MangaDex](https://mangadex.org/).
 
 ## Creating a feed
 
+There is now a [generator](https://tijlvdb.me/mdrss/) available that can
+generate feed URLs for you.
+
 ### Step 1: Create a query
 
 A query is made out of multiple key-value matchers in `key:value` format,
