@@ -6,13 +6,14 @@ import 'dotenv/config'
 import { prisma } from './components/prisma'
 import { Sentry } from './components/sentry'
 import axios from 'axios'
+import dayjs from 'dayjs'
 
 setInterval(() => {
 	fetchNewChapters().catch(e => {
 		console.error(e)
 		Sentry.captureException(e)
 	})
-}, 60 * 1000)
+}, 10 * 1000)
 fetchNewChapters().catch(e => {
 	console.error(e)
 	Sentry.captureException(e)
@@ -21,7 +22,7 @@ fetchNewChapters().catch(e => {
 async function fetchNewChapters() {
 	const lastPublishedDate = await getLastPublishedDate()
 	const chapters = await fetchChaptersSince(
-		lastPublishedDate?.toISOString().split('.')[0]
+		dateToMdDate(lastPublishedDate || undefined)
 	)
 
 	// Users
@@ -151,26 +152,29 @@ async function saveChapter(chapter: any) {
 }
 
 async function fetchChaptersSince(since?: string) {
+	const now = dayjs()
+
 	return axios
 		.get(`https://api.mangadex.org/chapter`, {
 			params: {
-				limit: 20,
-				publishAtSince: since,
-				'order[publishAt]': since ? 'asc' : 'desc', // If we don't have any chapters yet, we want the last chapters, not the first
+				limit: 40,
+				publishAtSince:
+					since || dateToMdDate(dayjs().subtract(2, 'days').toDate()),
+				'order[publishAt]': 'asc',
 				includes: ['manga', 'user', 'scanlation_group']
 			}
 		})
 		.then(d => {
-			return d.data.results.map(r => {
+			return (d.data.results as any[]).map(r => {
 				const attrs = r.data.attributes
 				const rels = r.data.relationships
 				return {
-					id: r.data.id,
-					title: attrs.title,
-					volume: attrs.volume,
-					chapter: attrs.chapter,
-					publishedAt: attrs.publishAt,
-					translatedLanguage: attrs.translatedLanguage,
+					id: r.data.id as string,
+					title: attrs.title as string,
+					volume: attrs.volume as string,
+					chapter: attrs.chapter as string,
+					publishedAt: attrs.publishAt as string,
+					translatedLanguage: attrs.translatedLanguage as string,
 					uploader: compactMdRelationshipObject(
 						rels.find(rel => rel.type === 'user')
 					),
@@ -183,6 +187,7 @@ async function fetchChaptersSince(since?: string) {
 				}
 			})
 		})
+		.then(chapters => chapters.filter(ch => now.isAfter(ch.publishedAt)))
 }
 
 function compactMdRelationshipObject(obj: any) {
@@ -190,4 +195,8 @@ function compactMdRelationshipObject(obj: any) {
 		id: obj.id,
 		...obj.attributes
 	}
+}
+
+function dateToMdDate(d?: Date) {
+	return d?.toISOString().split('.')[0]
 }
