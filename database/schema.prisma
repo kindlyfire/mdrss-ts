@@ -8,9 +8,8 @@ datasource db {
 }
 
 generator client {
-    provider        = "prisma-client-js"
-    binaryTargets   = ["native"]
-    previewFeatures = ["nApi"]
+    provider      = "prisma-client-js"
+    binaryTargets = ["native"]
 }
 
 model Chapter {
