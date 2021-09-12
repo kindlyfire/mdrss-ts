@@ -165,11 +165,11 @@ async function fetchChaptersSince(since?: string) {
 			}
 		})
 		.then(d => {
-			return (d.data.results as any[]).map(r => {
-				const attrs = r.data.attributes
-				const rels = r.data.relationships
+			return (d.data.data as any[]).map(r => {
+				const attrs = r.attributes
+				const rels = r.relationships
 				return {
-					id: r.data.id as string,
+					id: r.id as string,
 					title: attrs.title as string,
 					volume: attrs.volume as string,
 					chapter: attrs.chapter as string,
