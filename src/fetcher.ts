@@ -157,11 +157,12 @@ async function fetchChaptersSince(since?: string) {
 	return axios
 		.get(`https://api.mangadex.org/chapter`, {
 			params: {
-				limit: 40,
+				limit: 50,
 				publishAtSince:
 					since || dateToMdDate(dayjs().subtract(2, 'days').toDate()),
 				'order[publishAt]': 'asc',
-				includes: ['manga', 'user', 'scanlation_group']
+				includes: ['manga', 'user', 'scanlation_group'],
+				includeFutureUpdates: 0
 			}
 		})
 		.then(d => {
