@@ -108,6 +108,7 @@ async function saveManga(manga: any) {
 }
 
 async function saveScanlationGroup(group: any) {
+	if (!group.name) return
 	await prisma.scanlationGroup.upsert({
 		where: {
 			uuid: group.id
