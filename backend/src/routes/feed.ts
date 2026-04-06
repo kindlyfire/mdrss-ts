@@ -180,8 +180,8 @@ function buildFeed(queries: ParsedQuery[], results: QueryResults, url: URL) {
 					)
 					.join(', ')}<br />
 				<b>Uploader</b>: <a href="https://mangadex.org/user/${r.user.id}">${
-				r.user.username
-			}</a><br /><br />
+					r.user.username ?? 'Unknown user'
+				}</a><br /><br />
                 <a href="https://mangadex.org/chapter/${
 									r.chapters.id
 								}" target="_blank"><b>Read chapter</b></a><br />
@@ -209,7 +209,7 @@ function formatFeedTitle(queries: ParsedQuery[], results: QueryResults) {
 			''
 	} else if (q.users.length) {
 		title = 'User: '
-		title += r.user.username
+		title += r.user.username ?? `Unknown user`
 	} else if (q.languages.length) {
 		title = 'Language: '
 		title += q.languages.join(', ')

@@ -11,6 +11,10 @@ export async function fetchChaptersSince(since: Date) {
 	params.append('includes[]', 'user')
 	params.append('includes[]', 'scanlation_group')
 
+	// console.log(
+	// 	`Fetching URL: https://api.mangadex.org/chapter?${params.toString()}`
+	// )
+
 	const v = await fetch(
 		`https://api.mangadex.org/chapter?` + params.toString(),
 		{
@@ -33,7 +37,7 @@ export async function fetchChaptersSince(since: Date) {
 			translatedLanguage: attrs.translatedLanguage as string,
 			uploader: compactMdRelationshipObject<{
 				id: string
-				username: string
+				username?: string
 			}>(rels.find(rel => rel.type === 'user')),
 			groups: rels
 				.filter(rel => rel.type === 'scanlation_group')

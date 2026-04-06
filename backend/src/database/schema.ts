@@ -42,5 +42,5 @@ export const tManga = pgTable('manga', {
 
 export const tUsers = pgTable('user', {
 	...defaultColumns(),
-	username: text('username').notNull()
+	username: text('username')
 })

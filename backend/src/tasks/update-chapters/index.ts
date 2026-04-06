@@ -30,10 +30,18 @@ export async function updateChapters() {
 	const chapters = await fetchChaptersSince(updateFromDate)
 
 	for (const chapter of chapters) {
-		await saveUser(chapter.uploader)
-		await saveManga(chapter.manga)
-		await saveChapter(chapter)
-		for (const group of chapter.groups) await saveGroup(group)
+		try {
+			await saveUser(chapter.uploader)
+			await saveManga(chapter.manga)
+			await saveChapter(chapter)
+			for (const group of chapter.groups) await saveGroup(group)
+		} catch (e) {
+			console.error(
+				`Error saving chapter ${chapter.id}:`,
+				JSON.stringify(chapter, null, 2)
+			)
+			throw e
+		}
 	}
 
 	const prefix = `Updating from ${dayjs(updateFromDate).format(
@@ -52,14 +60,19 @@ export async function updateChapters() {
 }
 
 async function saveUser(user: MdChapter['uploader']) {
-	const data = { username: user.username }
-	await db
-		.insert(tUsers)
-		.values({ id: user.id, ...data })
-		.onConflictDoUpdate({
-			target: tUsers.id,
-			set: data
-		})
+	if (user.username)
+		await db
+			.insert(tUsers)
+			.values({ id: user.id, username: user.username ?? null })
+			.onConflictDoUpdate({
+				target: tUsers.id,
+				set: { username: user.username }
+			})
+	else
+		await db
+			.insert(tUsers)
+			.values({ id: user.id, username: user.username ?? null })
+			.onConflictDoNothing()
 }
 
 async function saveManga(manga: MdChapter['manga']) {

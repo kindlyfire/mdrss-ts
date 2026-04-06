@@ -8,6 +8,13 @@
       "when": 1712231714751,
       "tag": "0000_warm_kree",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775488083486,
+      "tag": "0001_useful_nemesis",
+      "breakpoints": true
     }
   ]
 }
